@@ -2,19 +2,42 @@
 
 abstract class BaseDriver
 {
+    protected $_dsnConfig = array();
+    
     protected $_dsn = array();
+
+    protected $_firstDb;
+
+    protected $_secondDb;
 
     protected static $_instance = null;
 
+    public function setDsnConfig(array $dsnConfig, $firstDb, $secondDb) {
+        $this->_dsnConfig = $dsnConfig;
+        $this->_firstDb = $firstDb;
+        $this->_secondDb = $secondDb;
+    }
+
+    public function getDSN($dbName){
+        $dSN = DATABASE_DRIVER . '://' . 
+            $this->_dsnConfig["DSN_" . $dbName]["DATABASE_USER"] . 
+            ':' . $this->_dsnConfig["DSN_" . $dbName]["DATABASE_PASSWORD"] . 
+            '@' . $this->_dsnConfig["DSN_" . $dbName]["DATABASE_HOST"] .
+            ':' . $this->_dsnConfig["DSN_" . $dbName]["DATABASE_PORT"] .
+            '/' . $this->_dsnConfig["DSN_" . $dbName]["DATABASE_NAME"];
+
+        return $dSN;
+    }
+
     protected function _getFirstConnect()
     {
-        return $this->_getConnect(FIRST_DSN, FIRST_BASE_NAME);
+        return $this->_getConnect($this->getDSN($this->_firstDb));
     }
 
 
     protected function _getSecondConnect()
     {
-        return $this->_getConnect(SECOND_DSN, SECOND_BASE_NAME);
+        return $this->_getConnect($this->getDSN($this->_secondDb));
     }
 
     protected function _getConnect($dsn)
@@ -22,12 +45,12 @@ abstract class BaseDriver
         if (!isset($this->_dsn[$dsn])) {
             $pdsn = parse_url($dsn);
 
-            if (in_array(DRIVER, array('sqlserv', 'dblib', 'mssql'))) {
-                $dsn = DRIVER . ':host=' . $pdsn['host'] . ':' . $pdsn['port'] . ';dbname=' . substr($pdsn['path'], 1, 1000) . ';charset=' . DATABASE_ENCODING;
-            } elseif (in_array(DRIVER, array('oci', 'oci8'))) {
+            if (in_array(DATABASE_DRIVER, array('sqlserv', 'dblib', 'mssql'))) {
+                $dsn = DATABASE_DRIVER . ':host=' . $pdsn['host'] . ':' . $pdsn['port'] . ';dbname=' . substr($pdsn['path'], 1, 1000) . ';charset=' . DATABASE_ENCODING;
+            } elseif (in_array(DATABASE_DRIVER, array('oci', 'oci8'))) {
                 $dsn = 'oci:dbname=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=' . $pdsn['host'] . ')(PORT=' . $pdsn['port'] . '))(CONNECT_DATA=(SERVICE_NAME=' . substr($pdsn['path'], 1, 1000) . ')));charset=' . DATABASE_ENCODING;
             } else {
-                $dsn = DRIVER . ':host=' . $pdsn['host'] . ';port=' . $pdsn['port'] . ';dbname=' . substr($pdsn['path'], 1, 1000) . (DRIVER !== 'pgsql' ? ';charset=' . DATABASE_ENCODING : '');
+                $dsn = DATABASE_DRIVER . ':host=' . $pdsn['host'] . ';port=' . $pdsn['port'] . ';dbname=' . substr($pdsn['path'], 1, 1000) . (DATABASE_DRIVER !== 'pgsql' ? ';charset=' . DATABASE_ENCODING : '');
             }
 
             $this->_dsn[$dsn] = new PDO($dsn, $pdsn['user'], isset($pdsn['pass']) ? $pdsn['pass'] : '', array(
@@ -61,8 +84,8 @@ abstract class BaseDriver
     {
 
         $out = array();
-        $fArray = $this->_prepareOutArray($this->_select($query, $this->_getFirstConnect(), FIRST_BASE_NAME), $diffMode, $ifOneLevelDiff);
-        $sArray = $this->_prepareOutArray($this->_select($query, $this->_getSecondConnect(), SECOND_BASE_NAME), $diffMode, $ifOneLevelDiff);
+        $fArray = $this->_prepareOutArray($this->_select($query, $this->_getFirstConnect(), $this->_dsnConfig["DSN_" . $this->_firstDb]["DATABASE_NAME"]), $diffMode, $ifOneLevelDiff);
+        $sArray = $this->_prepareOutArray($this->_select($query, $this->_getSecondConnect(), $this->_dsnConfig["DSN_" . $this->_secondDb]["DATABASE_NAME"]), $diffMode, $ifOneLevelDiff);
 
         $allTables = array_unique(array_merge(array_keys($fArray), array_keys($sArray)));
         sort($allTables);
@@ -163,7 +186,7 @@ abstract class BaseDriver
         if (!$tableName) throw new Exception('$tableName is not set');
         $rowCount = (int)$rowCount;
         $tableName = preg_replace("$[^A-z0-9.,-_]$", '', $tableName);
-        switch (DRIVER) {
+        switch (DATABASE_DRIVER) {
             case "mssql":
             case "dblib":
             case "mssql":
@@ -182,10 +205,10 @@ abstract class BaseDriver
                 throw new Exception('Select query not set');
 
         }
-        if ($baseName === FIRST_BASE_NAME) {
-            $result = $this->_select($query, $this->_getFirstConnect(), FIRST_BASE_NAME);
+        if ($baseName === $this->_firstDb["DATABASE_NAME"]) {
+            $result = $this->_select($query, $this->_getFirstConnect(), $this->_firstDb["DATABASE_NAME"]);
         } else {
-            $result = $this->_select($query, $this->_getSecondConnect(), SECOND_BASE_NAME);
+            $result = $this->_select($query, $this->_getSecondConnect(), $this->_secondDb["DATABASE_NAME"]);
         }
 
         if ($result) {

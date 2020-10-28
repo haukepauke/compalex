@@ -1,11 +1,11 @@
-[ Main settings ]
+[Main_Settings]
 ; Possible DATABASE_DRIVER: 'mysql', 'pgsql', 'dblib', 'oci'.
 ; Please use 'dblib' for Microsoft SQL Server
 DATABASE_DRIVER = mysql
 DATABASE_ENCODING = utf8
 SAMPLE_DATA_LENGTH = 100
 
-[ Primary connection params ]
+[DSN_First]
 DATABASE_HOST = localhost
 DATABASE_PORT = 3306
 DATABASE_NAME = compalex_dev
@@ -13,10 +13,26 @@ DATABASE_USER = login
 DATABASE_PASSWORD = password
 DATABASE_DESCRIPTION = Developer database
 
-[ Secondary connection params ]
-DATABASE_HOST_SECONDARY = localhost
-DATABASE_PORT_SECONDARY = 3306
-DATABASE_NAME_SECONDARY = compalex_prod
-DATABASE_USER_SECONDARY = login
-DATABASE_PASSWORD_SECONDARY = password
-DATABASE_DESCRIPTION_SECONDARY = Production database
+[DSN_Second]
+DATABASE_HOST = localhost
+DATABASE_PORT = 3306
+DATABASE_NAME = compalex_prod
+DATABASE_USER = login
+DATABASE_PASSWORD = password
+DATABASE_DESCRIPTION = Production database
+
+[DSN_Third]
+DATABASE_HOST = localhost
+DATABASE_PORT = 3306
+DATABASE_NAME = compalex_dev
+DATABASE_USER = login
+DATABASE_PASSWORD = password
+DATABASE_DESCRIPTION = Developer database
+
+[DSN_Fourth]
+DATABASE_HOST = localhost
+DATABASE_PORT = 3306
+DATABASE_NAME = compalex_prod
+DATABASE_USER = login
+DATABASE_PASSWORD = password
+DATABASE_DESCRIPTION = Production database

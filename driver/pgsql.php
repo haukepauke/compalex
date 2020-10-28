@@ -2,15 +2,15 @@
 
 class Driver extends BaseDriver
 {
-    public static function getInstance()
+    public static function getInstance($dsnConfig, $firstDb, $secondDb)
     {
         if (self::$_instance === null) {
             self::$_instance = new self;
+            self::$_instance->setDsnConfig($dsnConfig, $firstDb, $secondDb);
         }
         return self::$_instance;
     }
-
-
+    
     public function getCompareTables()
     {
         return $this->_getTableAndViewResult('BASE TABLE');

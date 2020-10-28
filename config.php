@@ -5,40 +5,27 @@ define('ENVIRONMENT_FILE', DIR_ROOT . '/.environment');
 define('DRIVER_DIR', DIR_ROOT . '/driver/');
 define('TEMPLATE_DIR', DIR_ROOT . '/template/');
 
-if(isset($_ENV['DATABASE_DRIVER']) && isset($_ENV['DATABASE_HOST']) && isset($_ENV['DATABASE_HOST_SECONDARY'])){
-    $params = $_ENV;
-}else{
-    if (!file_exists(ENVIRONMENT_FILE)) die('File "' . ENVIRONMENT_FILE . '" not exist. Please create file.');
-    $params = parse_ini_file(ENVIRONMENT_FILE, false, INI_SCANNER_RAW);
+if (!file_exists(ENVIRONMENT_FILE)) die('File "' . ENVIRONMENT_FILE . '" not exist. Please create file.');
+$config = parse_ini_file(ENVIRONMENT_FILE, true, INI_SCANNER_RAW);
+
+$dsnConfig = array();
+foreach($config as $sectionName => $section){
+    foreach ($section as $key => $value) {
+        if($sectionName === "Main_Settings") {
+            define($key, $value);    
+        } else if (substr($sectionName, 0, 4) === "DSN_") {
+            $dsnConfig[$sectionName] = $section;
+        }
+    }
 }
 
-$requiredParams = array(
-    'DATABASE_DRIVER',
-    'DATABASE_ENCODING',
-    'SAMPLE_DATA_LENGTH',
+if(empty($dsnConfig)) {
+    die('No DSN configuration found in ' . ENVIRONMENT_FILE);
+}
 
-    'DATABASE_HOST',
-    'DATABASE_PORT',
-    'DATABASE_NAME',
-    'DATABASE_USER',
-    'DATABASE_PASSWORD',
-    'DATABASE_DESCRIPTION',
+if(!defined('DATABASE_DRIVER') || !defined('DATABASE_ENCODING') || !defined('SAMPLE_DATA_LENGTH')) {
+    die('Configuration values in Main_Settings missing in file ' . ENVIRONMENT_FILE);
+}
 
-    'DATABASE_HOST_SECONDARY',
-    'DATABASE_PORT_SECONDARY',
-    'DATABASE_NAME_SECONDARY',
-    'DATABASE_USER_SECONDARY',
-    'DATABASE_PASSWORD_SECONDARY',
-    'DATABASE_DESCRIPTION_SECONDARY',
-);
+//define('SECOND_DSN',  DATABASE_DRIVER.'://'.DATABASE_USER_SECONDARY.':'.DATABASE_PASSWORD_SECONDARY.'@'.DATABASE_HOST_SECONDARY.':'.DATABASE_PORT_SECONDARY.'/'.DATABASE_NAME_SECONDARY);
 
-array_map(function ($name) use ($params) {
-    if (!isset($params[$name])) {
-        die('Param ' . $name . ' not set in file ' . ENVIRONMENT_FILE);
-    }else{
-        define($name, $params[$name]);
-    }
-}, $requiredParams);
-
-define('FIRST_DSN',  DATABASE_DRIVER.'://'.DATABASE_USER.':'.DATABASE_PASSWORD.'@'.DATABASE_HOST.':'.DATABASE_PORT.'/'.DATABASE_NAME);
-define('SECOND_DSN',  DATABASE_DRIVER.'://'.DATABASE_USER_SECONDARY.':'.DATABASE_PASSWORD_SECONDARY.'@'.DATABASE_HOST_SECONDARY.':'.DATABASE_PORT_SECONDARY.'/'.DATABASE_NAME_SECONDARY);
