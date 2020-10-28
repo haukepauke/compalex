@@ -2,20 +2,20 @@
 
 class Driver extends BaseDriver
 {
+    public static function getInstance($dsnConfig, $firstDb, $secondDb)
+    {
+        if (self::$_instance === null) {
+            self::$_instance = new self;
+            self::$_instance->setDsnConfig($dsnConfig, $firstDb, $secondDb);
+        }
+        return self::$_instance;
+    }
+    
     const
         FUNCTIONS = 'TF',
         TABLES = 'U',
         VIEWS = 'V',
         PROCEDURE = 'P';
-
-
-    public static function getInstance()
-    {
-        if (self::$_instance === null) {
-            self::$_instance = new self;
-        }
-        return self::$_instance;
-    }
 
     public function getCompareTables()
     {

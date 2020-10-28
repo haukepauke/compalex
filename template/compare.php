@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>COMPALEX - database schema compare tool</title>
+    <title>COMPALEX Plus - database schema compare tool</title>
     <script src="./public/js/jquery.min.js"></script>
     <script src="./public/js/functional.js"></script>
     <style type="text/css" media="all">
@@ -18,13 +18,38 @@
 </div>
 
 <div class="compare-database-block">
-    <h1>Compalex<span style="color: red;">.net</span></h1>
+    <h1>Compalex Plus</h1>
     <h3>Database schema compare tool</h3>
+    <table class="table">
+        <tr class="panel">
+            <form name="dbselect" action="./index.php">
+                <label for="first">First Database:</label>
+                <select id="first" name="first">
+                    <?php  
+                        foreach($dbNames as $db){
+                            echo "<option name=" . substr($db, 4) . ">" . substr($db, 4) . "</option>";
+                        }
+                    
+                    ?>
+                </select>
+                <label for="second">Second Database:</label>
+                <select id="second" name="second">
+                    <?php 
+                         foreach($dbNames as $db){
+                            echo "<option name=" . substr($db, 4) . ">" . substr($db, 4) . "</option>";
+                        }
+                    ?>
+                </select>
+                <input type="submit" value="Change Databases">
+            </form>
+        </tr>
+    </table>
+    <br/>
     <table class="table">
         <tr class="panel">
             <td>
                 <?php
-                switch (DRIVER) {
+                switch (DATABASE_DRIVER) {
                     case 'oci8':
                     case 'oci':
                     case 'mysql':
@@ -50,22 +75,21 @@
             <td class="sp">
                 <a href="#" onclick="Data.showAll(this); return false;" class="active">all</a>
                 <a href="#" onclick="Data.showDiff(this); return false;">changed</a>
-
             </td>
         </tr>
     </table>
     <table class="table">
         <tr class="header">
             <td width="50%">
-                <h2><?php echo DATABASE_NAME ?></h2>
-                <h4 style="color: darkred; margin-top: 2px; "><?php echo DATABASE_DESCRIPTION ?></h4>
-                <span><?php $spath = explode("@", FIRST_DSN);
+                <h2><?php echo $dsnConfig["DSN_" . $firstDb]["DATABASE_NAME"] ?></h2>
+                <h4 style="color: darkred; margin-top: 2px; "><?php echo $dsnConfig["DSN_" . $firstDb]["DATABASE_DESCRIPTION"] ?></h4>
+                <span><?php $spath = explode("@", $driver->getDSN($firstDb));
                     echo end($spath); ?></span>
             </td>
             <td  width="50%">
-                <h2><?php echo DATABASE_NAME_SECONDARY ?></h2>
-                <h4 style="color: darkred; margin-top: 2px; "><?php echo DATABASE_DESCRIPTION_SECONDARY ?></h4>
-                <span><?php $spath = explode("@", SECOND_DSN);
+                <h2><?php echo $dsnConfig["DSN_" . $secondDb]["DATABASE_NAME"] ?></h2>
+                <h4 style="color: darkred; margin-top: 2px; "><?php echo $dsnConfig["DSN_" . $secondDb]["DATABASE_DESCRIPTION"] ?></h4>
+                <span><?php $spath = explode("@", $driver->getDSN($secondDb));
                     echo end($spath); ?></span>
             </td>
         </tr>
@@ -109,6 +133,6 @@
     </table>
     <p>&nbsp;</p>
     <hr />
-    <p>For more information go to <a href="http://compalex.net" target="_blank">compalex.net</a></p>
+    <p>For more information go to <a href="https://github.com/haukepauke/compalex" target="_blank">github.com/haukepauke/compalex</a></p>
 </div>
 </body>
