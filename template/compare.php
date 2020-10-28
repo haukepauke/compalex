@@ -137,7 +137,7 @@
         </tr>
     <?php } ?>
     </table>
-    <p><b>Ignored tables:</b> <?php echo TABLES_TO_IGNORE ?>.</p>
+    <p><b>Ignored tables:</b> <?php echo str_replace(",", ", ", TABLES_TO_IGNORE); ?>.</p>
     <p>&nbsp;</p>
     <hr />
     <p>For more information go to <a href="https://github.com/haukepauke/compalex" target="_blank">github.com/haukepauke/compalex</a></p>
