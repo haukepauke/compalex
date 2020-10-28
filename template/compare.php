@@ -93,7 +93,13 @@
                     echo end($spath); ?></span>
             </td>
         </tr>
-    <?php foreach ($tables as $tableName => $data) { ?>
+    <?php 
+        $tablesToIgnore = explode(",", TABLES_TO_IGNORE);
+        foreach ($tables as $tableName => $data) { 
+            if (array_search($tableName, $tablesToIgnore) !== false) {
+                continue;
+            }
+        ?>
         <tr class="data">
             <?php foreach (array('fArray', 'sArray') as $blockType) { ?>
             <td class="type-<?php echo $_REQUEST['action']; ?>">
